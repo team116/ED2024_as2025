@@ -1,0 +1,63 @@
+{
+    "version": "v0.3.1",
+    "robotConfiguration": {
+        "mass": 59.27038160247355,
+        "rotationalInertia": 71.529,
+        "motorMaxTorque": 1.087292817679558,
+        "motorMaxVelocity": 4704,
+        "gearing": 6.75,
+        "wheelbase": 0.6318246588146842,
+        "trackWidth": 0.6222996639581815,
+        "bumperLength": 0.9143995062242666,
+        "bumperWidth": 0.9143995062242666,
+        "wheelRadius": 0.050799972568014815
+    },
+    "paths": {
+        "NewPath": {
+            "waypoints": [
+                {
+                    "x": 1.3821440935134888,
+                    "y": 5.52623176574707,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 40
+                },
+                {
+                    "x": 4.2014,
+                    "y": 5.52623176574707,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 40
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        }
+    },
+    "splitTrajectoriesAtStopPoints": false,
+    "usesObstacles": false
+}
