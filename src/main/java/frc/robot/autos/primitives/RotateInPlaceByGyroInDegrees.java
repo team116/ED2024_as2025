@@ -58,7 +58,7 @@ public class RotateInPlaceByGyroInDegrees extends SequentialCommandGroup {
         public void initialize() {
             super.initialize();
             atAngleCount = 0;
-            double currentYaw = gyro.getYaw();
+            double currentYaw = gyro.getYaw().getValueAsDouble();
             //System.out.println("currentYaw: " + currentYaw);
             //System.out.println("desiredAngleDegrees: " + desiredAngleDegrees);
             angleToCheckForInDegrees = currentYaw - desiredAngleDegrees;  // Assign to computed angle from current angle
@@ -70,8 +70,8 @@ public class RotateInPlaceByGyroInDegrees extends SequentialCommandGroup {
         public void execute() {
             super.execute();
 
-            SmartDashboard.putNumber("currentRotationAngle", gyro.getYaw());  // FIXME: Remove later
-            double angleDifference = angleToCheckForInDegrees - gyro.getYaw();
+            SmartDashboard.putNumber("currentRotationAngle", gyro.getYaw().getValueAsDouble());  // FIXME: Remove later
+            double angleDifference = angleToCheckForInDegrees - gyro.getYaw().getValueAsDouble();
             double absAngleDifference = Math.abs(angleDifference);
             if (Math.abs(absAngleDifference) < DEGREES_AWAY_FROM_DESIRED_THRESHOLD) {
                 ++atAngleCount;

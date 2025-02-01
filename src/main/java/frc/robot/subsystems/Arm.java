@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-//import com.revrobotics.spark.SparkPIDController;
+//import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
@@ -15,12 +15,13 @@ public class Arm extends SubsystemBase {
     private DutyCycleEncoder armEncoder;
 
     private SparkMax armRotationMotor;
-    //private SparkPIDController armMotorController;
+    //private SparkClosedLoopController armMotorController;
 
     private SparkLimitSwitch arm1LimitSwitch;
     private SparkLimitSwitch arm2LimitSwitch;
 
     public Arm() {
+/*
         armEncoder = new DutyCycleEncoder(Constants.ARM_ENCODER_CHANNEL, 360.0d, 0.0d);
         armRotationMotor = new SparkMax(Constants.ARM_ROTATION_MOTOR_ID, MotorType.kBrushless);
 
@@ -32,7 +33,7 @@ public class Arm extends SubsystemBase {
         arm1LimitSwitch.enableLimitSwitch(true);
         arm2LimitSwitch.enableLimitSwitch(true);
 
-        //armMotorController = armRotationMotor.getPIDController();
+        //armMotorController = armRotationMotor.getClosedLoopController();
 
         armRotationMotor.setInverted(true); //Originally  was false 
 
@@ -41,6 +42,7 @@ public class Arm extends SubsystemBase {
         //armEncoder.setDistancePerRotation(360);  NOTE: Done through constructor now
 
         armRotationMotor.burnFlash();  // FIXME: configure with all SparkBaseConfig settings...
+*/
     }
 
     public void moveUp() {
@@ -68,13 +70,15 @@ public class Arm extends SubsystemBase {
     }
 
     public void enableLimitSwitches() {
-        arm1LimitSwitch.enableLimitSwitch(true);
-        arm2LimitSwitch.enableLimitSwitch(true);
+        // FIXME: We don't care about arm
+        // arm1LimitSwitch.enableLimitSwitch(true);
+        // arm2LimitSwitch.enableLimitSwitch(true);
     }
 
     public void disableLimitSwitches() {
-        arm1LimitSwitch.enableLimitSwitch(false);
-        arm2LimitSwitch.enableLimitSwitch(false);
+        // FIXME: still don't care about arm
+        // arm1LimitSwitch.enableLimitSwitch(false);
+        // arm2LimitSwitch.enableLimitSwitch(false);
     }
 
     public double getAngleDegrees() {

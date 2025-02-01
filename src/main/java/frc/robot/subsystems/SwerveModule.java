@@ -3,9 +3,13 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkPIDController;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkClosedLoopController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -28,12 +32,15 @@ public class SwerveModule {
   private SparkMax angleMotor;
   private SparkMax driveMotor;
 
+  private SparkMaxConfig angleMotorConfig = new SparkMaxConfig();
+  private SparkMaxConfig driveMotorConfig = new SparkMaxConfig();
+
   private RelativeEncoder driveEncoder;
   private RelativeEncoder integratedAngleEncoder;
   private CANCoder angleEncoder;
 
-  private final SparkPIDController driveController;
-  private final SparkPIDController angleController;
+  private final SparkClosedLoopController driveController;
+  private final SparkClosedLoopController angleController;
 
   private final SimpleMotorFeedforward feedforward =
       new SimpleMotorFeedforward(
@@ -50,13 +57,13 @@ public class SwerveModule {
     /* Angle Motor Config */
     angleMotor = new SparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
     integratedAngleEncoder = angleMotor.getEncoder();
-    angleController = angleMotor.getPIDController();
+    angleController = angleMotor.getClosedLoopController();
     configAngleMotor();
 
     /* Drive Motor Config */
     driveMotor = new SparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
     driveEncoder = driveMotor.getEncoder();
-    driveController = driveMotor.getPIDController();
+    driveController = driveMotor.getClosedLoopController();
     configDriveMotor();
 
     lastAngle = getState().angle;
@@ -106,62 +113,57 @@ public class SwerveModule {
   }
 
   private void configAngleMotor() {
-    angleMotor.restoreFactoryDefaults();
+    angleMotorConfig
+      .inverted(Constants.Swerve.ANGLE_INVERT)
+      .smartCurrentLimit(Constants.Swerve.ANGLE_CONTINUOUS_CURRENT_LIMIT)
+      .voltageCompensation(Constants.Swerve.VOLTAGE_COMP);
+
+    angleMotorConfig.encoder
+      .positionConversionFactor(Constants.Swerve.ANGLE_CONVERSION_FACTOR);
+
+    angleMotorConfig.closedLoop
+      .p(Constants.Swerve.ANGLE_KP)
+      .i(Constants.Swerve.ANGLE_KI)
+      .d(Constants.Swerve.ANGLE_KD)
+      .velocityFF(Constants.Swerve.ANGLE_KFF);
+
+    angleMotor.configure(angleMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     SparkMaxUtil.setSparkMaxBusUsage(angleMotor, Usage.kPositionOnly);
-    angleMotor.setSmartCurrentLimit(Constants.Swerve.ANGLE_CONTINUOUS_CURRENT_LIMIT);
-    angleMotor.setInverted(Constants.Swerve.ANGLE_INVERT);
-    // angleMotor.setIdleMode(Constants.Swerve.ANGLE_NEUTRAL_MODE);
-
-    integratedAngleEncoder.setPositionConversionFactor(Constants.Swerve.ANGLE_CONVERSION_FACTOR);
-
-    angleController.setP(Constants.Swerve.ANGLE_KP);
-    angleController.setI(Constants.Swerve.ANGLE_KI);
-    angleController.setD(Constants.Swerve.ANGLE_KD);
-    angleController.setFF(Constants.Swerve.ANGLE_KFF);
-
-    angleMotor.enableVoltageCompensation(Constants.Swerve.VOLTAGE_COMP);
-    angleMotor.burnFlash();
-    
+  
     resetToAbsolute();
   }
 
   private void configDriveMotor() {
-    driveMotor.restoreFactoryDefaults();
+    driveMotorConfig
+      .inverted(Constants.Swerve.DRIVE_INVERT)
+      .smartCurrentLimit(Constants.Swerve.DRIVE_CONTINUOUS_CURRENT_LIMIT)
+      .voltageCompensation(Constants.Swerve.VOLTAGE_COMP);
+
+    driveMotorConfig.encoder
+      .velocityConversionFactor(Constants.Swerve.DRIVE_CONVERSION_VELOCITY_FACTOR)
+      .positionConversionFactor(Constants.Swerve.DRIVE_CONVERSION_POSITION_FACTOR);
+
+    driveMotorConfig.closedLoop
+      .p(Constants.Swerve.DRIVE_KP)
+      .i(Constants.Swerve.DRIVE_KI)
+      .d(Constants.Swerve.DRIVE_KD)
+      .velocityFF(Constants.Swerve.DRIVE_KFF);
+    
+    driveMotorConfig.closedLoop  // NORMAL
+      .pidf(10, 0, 0, 0, ClosedLoopSlot.kSlot1)
+      .outputRange(-0.25, 0.25, ClosedLoopSlot.kSlot1);
+
+    driveMotorConfig.closedLoop  // FAST
+      .pidf(10, 0, 0, 0, ClosedLoopSlot.kSlot2)
+      .outputRange(-0.5, 0.5, ClosedLoopSlot.kSlot2);
+
+    driveMotorConfig.closedLoop  // SLOW
+      .pidf(10, 0, 0, 0, ClosedLoopSlot.kSlot3)
+      .outputRange(-0.2, 0.2, ClosedLoopSlot.kSlot3);
+
     SparkMaxUtil.setSparkMaxBusUsage(driveMotor, Usage.kAll);
-    driveMotor.setSmartCurrentLimit(Constants.Swerve.DRIVE_CONTINUOUS_CURRENT_LIMIT);
-    driveMotor.setInverted(Constants.Swerve.DRIVE_INVERT);
-    // driveMotor.setIdleMode(Constants.Swerve.DRIVE_NEUTRAL_MODE);
 
-    driveEncoder.setVelocityConversionFactor(Constants.Swerve.DRIVE_CONVERSION_VELOCITY_FACTOR);
-    // SmartDashboard.putNumber("Mod " + moduleNumber + " velocity conversion factor actual", driveEncoder.getVelocityConversionFactor());
-    // SmartDashboard.putNumber("Mod " + moduleNumber + " velocity conversion factor desired", Constants.Swerve.DRIVE_CONVERSION_VELOCITY_FACTOR);
-    driveEncoder.setPositionConversionFactor(Constants.Swerve.DRIVE_CONVERSION_POSITION_FACTOR);
-
-    driveController.setP(Constants.Swerve.DRIVE_KP);
-    driveController.setI(Constants.Swerve.DRIVE_KI);
-    driveController.setD(Constants.Swerve.DRIVE_KD);
-    driveController.setFF(Constants.Swerve.DRIVE_KFF);
-
-    driveController.setP(10, 1);  // NORMAL
-    driveController.setI(0, 1);
-    driveController.setD(0, 1);
-    driveController.setFF(0, 1);
-    driveController.setOutputRange(-0.25, 0.25, 1);  // FIXME: Bump this to be a tad higher?
-
-    driveController.setP(10, 2);  // FAST
-    driveController.setI(0, 2);
-    driveController.setD(0, 2);
-    driveController.setFF(0, 2);
-    driveController.setOutputRange(-0.5, 0.5, 2);
-
-    driveController.setP(10, 3);  // SLOW
-    driveController.setI(0, 3);
-    driveController.setD(0, 3);
-    driveController.setFF(0, 3);
-    driveController.setOutputRange(-0.2, 0.2, 3);
-
-    driveMotor.enableVoltageCompensation(Constants.Swerve.VOLTAGE_COMP);
-    driveMotor.burnFlash();
     driveEncoder.setPosition(0.0);
   }
 
@@ -176,7 +178,7 @@ public class SwerveModule {
       driveController.setReference(
           desiredState.speedMetersPerSecond,
           ControlType.kVelocity,
-          0,
+          ClosedLoopSlot.kSlot0,
           0.0); //feedforward.calculate(desiredState.speedMetersPerSecond)
     }
   }
@@ -214,7 +216,7 @@ public class SwerveModule {
   private void setPosition(SwerveModulePosition desiredPosition, int pidSlot) {
     driveController.setReference(
       desiredPosition.distanceMeters,
-      ControlType.kPosition, pidSlot);  // NOTE: Have 0..3 pid controller positions if we choose to use them
+      ControlType.kPosition, convertPidSlotToClosedLoopSlot(pidSlot));  // NOTE: Have 0..3 pid controller positions if we choose to use them
   }
 
   public void setSpeedPercent(double percent){
@@ -224,7 +226,7 @@ public class SwerveModule {
   public void goToPositionMeters(double desiredPositionMeters, int pidSlot) {
     driveController.setReference(
       desiredPositionMeters, // in to meters is / 39.37
-      ControlType.kPosition, pidSlot);  // NOTE: Have 0..3 pid controller positions if we choose to use them
+      ControlType.kPosition, convertPidSlotToClosedLoopSlot(pidSlot));  // NOTE: Have 0..3 pid controller positions if we choose to use them
       // in to meters is / 39.37
   }
 
@@ -232,6 +234,8 @@ public class SwerveModule {
   //   driveController.setReference(desiredPositionInches / 39.37, ControlType.kPosition, pidSlot);
   // }
 
+// FIXME: Need to configure differently now
+/*
   public void setP(double p, int pidSlot){
     driveController.setP(p, pidSlot);
   }
@@ -247,13 +251,14 @@ public class SwerveModule {
   public void setMinMax(double min, double max, int pidSlot){
     driveController.setOutputRange(min, max, pidSlot);
   }
-
+*/
   public void resetDriveEncoder(){
     driveEncoder.setPosition(0.0);
   }
 
   public void burnFlash(){
-    driveMotor.burnFlash();
+    // FIXME: Burn Flash is a completely separate thing now
+    //driveMotor.burnFlash();
   }
 
   public double getAngleOffset() {
@@ -285,7 +290,17 @@ public class SwerveModule {
     return driveEncoder.getPosition();
   }
 
-  public double countsPerRev(){
-    return driveEncoder.getCountsPerRevolution();
+  // public double countsPerRev(){
+  //   return driveEncoder.getCountsPerRevolution();
+  // }
+
+  private static ClosedLoopSlot convertPidSlotToClosedLoopSlot(int pidSlot) {
+    switch (pidSlot) {
+      case(0): return ClosedLoopSlot.kSlot0;
+      case(1): return ClosedLoopSlot.kSlot1;
+      case(2): return ClosedLoopSlot.kSlot2;
+      case(3): return ClosedLoopSlot.kSlot3;
+      default: return ClosedLoopSlot.kSlot0;
+    }
   }
 }

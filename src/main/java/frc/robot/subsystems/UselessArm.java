@@ -5,7 +5,7 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLimitSwitch;
-import com.revrobotics.spark.SparkPIDController;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -16,7 +16,7 @@ public class UselessArm extends SubsystemBase{
     private CANCoder armCanCoder;
     private SparkLimitSwitch armTopLimitSwitch;
     private SparkLimitSwitch armBottomLimitSwitch;
-    private SparkPIDController armMotorController;
+    private SparkClosedLoopController armMotorController;
     private RelativeEncoder armEncoder;
     private double desiredCANCoderPosition;
 
@@ -45,6 +45,8 @@ public class UselessArm extends SubsystemBase{
     }
 
     public UselessArm(){
+        // FIXME: Totally irrelevant class, should remove anyway
+        /*
         armMotor = new SparkMax(Constants.USELESS_ARM_MOTOR_ID, MotorType.kBrushless);
         // armMotor.setIdleMode(IdleMode.kBrake);
 
@@ -59,11 +61,12 @@ public class UselessArm extends SubsystemBase{
         armBottomLimitSwitch = armMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyClosed);
         armBottomLimitSwitch.enableLimitSwitch(false);
         
-        armMotorController = armMotor.getPIDController();
+        armMotorController = armMotor.getClosedLoopController();
         armMotorController.setP(30.0);// original value before playing with is 0.001, 30 looks like it works nicely
         armMotorController.setOutputRange(-0.2, 0.2);
         armMotorController.setFF(0.0);
         armMotor.burnFlash();
+        */
     }
 
     public void moveUp(){
@@ -102,12 +105,12 @@ public class UselessArm extends SubsystemBase{
     }
 
     public void enableLimitSwitches(){
-        armTopLimitSwitch.enableLimitSwitch(true);
+        //armTopLimitSwitch.enableLimitSwitch(true);
     }
 
     public void disableLimitSwitches(){
-        armBottomLimitSwitch.enableLimitSwitch(false);
-        armTopLimitSwitch.enableLimitSwitch(false);
+        //armBottomLimitSwitch.enableLimitSwitch(false);
+       // armTopLimitSwitch.enableLimitSwitch(false);
     }
 
     public double getEncoder(){

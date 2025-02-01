@@ -1,10 +1,12 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+// FIXME: PathPlanner totally changed, no need for just testing out running code since not used in 2025
+//import com.pathplanner.lib.auto.AutoBuilder;
+//import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+//import com.pathplanner.lib.util.PIDConstants;
+//import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,7 +38,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public SwerveSubsystem() {
     gyro = new Pigeon2(Swerve.PIGEON_ID);
-    gyro.configFactoryDefault();
+    // FIXME: Not sure what best equivalent is at this point
+    //gyro.configFactoryDefault();
     zeroGyro();
 
     mSwerveMods =
@@ -48,52 +52,52 @@ public class SwerveSubsystem extends SubsystemBase {
 
     swerveOdometry = new SwerveDriveOdometry(Swerve.SWERVE_KINEMATICS, getYaw(), getPositions());
 
-    AutoBuilder.configureHolonomic(
-                this::getPose, 
-                this::resetOdometry, 
-                this::getChassisSpeeds, 
-                this::driveAuto, 
-                new HolonomicPathFollowerConfig(
-                  new PIDConstants(AutoConstants.PX_CONTROLLER, AutoConstants.IX_CONTROLLER, AutoConstants.DX_CONTROLLER), 
-                  new PIDConstants(AutoConstants.P_THETA_CONTROLLER, AutoConstants.I_THETA_CONTROLLER, AutoConstants.D_THETA_CONTROLLER),
-                  3.5, // Original value 4.6
-                  0.4318, 
-                  new ReplanningConfig()
-                  ), 
-                  () -> {
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                      return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                  }, 
-                  this);
+    // AutoBuilder.configureHolonomic(
+    //             this::getPose, 
+    //             this::resetOdometry, 
+    //             this::getChassisSpeeds, 
+    //             this::driveAuto, 
+    //             new HolonomicPathFollowerConfig(
+    //               new PIDConstants(AutoConstants.PX_CONTROLLER, AutoConstants.IX_CONTROLLER, AutoConstants.DX_CONTROLLER), 
+    //               new PIDConstants(AutoConstants.P_THETA_CONTROLLER, AutoConstants.I_THETA_CONTROLLER, AutoConstants.D_THETA_CONTROLLER),
+    //               3.5, // Original value 4.6
+    //               0.4318, 
+    //               new ReplanningConfig()
+    //               ), 
+    //               () -> {
+    //                 var alliance = DriverStation.getAlliance();
+    //                 if (alliance.isPresent()) {
+    //                   return alliance.get() == DriverStation.Alliance.Red;
+    //                 }
+    //                 return false;
+    //               }, 
+    //               this);
 
     field = new Field2d();
     // SmartDashboard.putData("Field", field);
   }
 
   public void reconfigureAutoBuilder() {
-    AutoBuilder.configureHolonomic(
-                this::getPose, 
-                this::resetOdometry, 
-                this::getChassisSpeeds, 
-                this::driveAuto, 
-                new HolonomicPathFollowerConfig(
-                  new PIDConstants(AutoConstants.PX_CONTROLLER, AutoConstants.IX_CONTROLLER, AutoConstants.DX_CONTROLLER), 
-                  new PIDConstants(AutoConstants.P_THETA_CONTROLLER, AutoConstants.I_THETA_CONTROLLER, AutoConstants.D_THETA_CONTROLLER),
-                  2.0, // Original value 4.6
-                  0.4318, 
-                  new ReplanningConfig()
-                  ), 
-                  () -> {
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                      return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                  }, 
-                  this);
+    // AutoBuilder.configureHolonomic(
+    //             this::getPose, 
+    //             this::resetOdometry, 
+    //             this::getChassisSpeeds, 
+    //             this::driveAuto, 
+    //             new HolonomicPathFollowerConfig(
+    //               new PIDConstants(AutoConstants.PX_CONTROLLER, AutoConstants.IX_CONTROLLER, AutoConstants.DX_CONTROLLER), 
+    //               new PIDConstants(AutoConstants.P_THETA_CONTROLLER, AutoConstants.I_THETA_CONTROLLER, AutoConstants.D_THETA_CONTROLLER),
+    //               2.0, // Original value 4.6
+    //               0.4318, 
+    //               new ReplanningConfig()
+    //               ), 
+    //               () -> {
+    //                 var alliance = DriverStation.getAlliance();
+    //                 if (alliance.isPresent()) {
+    //                   return alliance.get() == DriverStation.Alliance.Red;
+    //                 }
+    //                 return false;
+    //               }, 
+    //               this);
   }
 
   public void setAutoConstant(String name, double value) {
@@ -211,7 +215,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void setMinMax(double min, double max, int pidSlot){
     for (SwerveModule swerveModule : mSwerveMods){
-      swerveModule.setMinMax(min, max, pidSlot);
+      //swerveModule.setMinMax(min, max, pidSlot);
     }
   }
 
@@ -268,11 +272,12 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public void setPID(double p, double i, double d, int pidSlot){
-    for (SwerveModule mod : mSwerveMods){
-      mod.setP(p, pidSlot);
-      mod.setI(i, pidSlot);
-      mod.setD(d, pidSlot);
-    }
+    // FIXME: Nobody cares, as there is NO ARM on the robot (code should have been nuked in 2024)
+    // for (SwerveModule mod : mSwerveMods){
+    //   mod.setP(p, pidSlot);
+    //   mod.setI(i, pidSlot);
+    //   mod.setD(d, pidSlot);
+    // }
   }
 
   public void setSpeedPercent(double percent){
@@ -355,17 +360,18 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public double getPitch(){
-    return gyro.getPitch();
+    return gyro.getPitch().getValueAsDouble();
   }
 
   public double getRoll(){
-    return gyro.getRoll();
+    return gyro.getRoll().getValueAsDouble();
   }
 
   public Rotation2d getYaw() {
+    StatusSignal<Angle> yawStatusSignal = gyro.getYaw();
     return (Swerve.INVERT_GYRO)
-        ? Rotation2d.fromDegrees(360 - gyro.getYaw())
-        : Rotation2d.fromDegrees(gyro.getYaw());
+        ? Rotation2d.fromDegrees(360.0 - yawStatusSignal.getValueAsDouble())
+        : Rotation2d.fromDegrees(yawStatusSignal.getValueAsDouble());
   }
 
   @Override
