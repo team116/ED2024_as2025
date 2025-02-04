@@ -129,7 +129,7 @@ public class RobotContainer {
   
   private final Pigeon2 gyro = s_Swerve.getGyro();
 
-  private final SendableChooser<Command> sendableChooser;
+  //private final SendableChooser<Command> sendableChooser;
 
   private final ToggleStateBooleanSupplier robotCentricState = new ToggleStateBooleanSupplier();
 
@@ -152,7 +152,7 @@ public class RobotContainer {
     //arm.setDefaultCommand(new DefaultArmCommand(arm, gunnerLogitech, gunnerStation));
     // arm.setDefaultCommand(new DefaultArmCommand(arm, gunnerLogitech, gunnerStation));
 
-    NamedCommands.registerCommand("First Command", new InstantCommand(() -> SmartDashboard.putString("The Event Marker has been pressed", "It has been pressed")));
+    //NamedCommands.registerCommand("First Command", new InstantCommand(() -> SmartDashboard.putString("The Event Marker has been pressed", "It has been pressed")));
 
    
 
@@ -165,27 +165,27 @@ public class RobotContainer {
 
 
     double delay = SmartDashboard.getNumber("Delay", 0);
-    sendableChooser = AutoBuilder.buildAutoChooser();
-    sendableChooser.addOption("Do Nothing", new DoNothingCommand());
+    // sendableChooser = AutoBuilder.buildAutoChooser();
+    // sendableChooser.addOption("Do Nothing", new DoNothingCommand());
 
-    sendableChooser.addOption("Center One Note Auto", new OneNoteAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
-    sendableChooser.addOption("Center Two Note Auto", new TwoNoteAuto(s_Swerve, arm, intakeSubsystem, shooter, delay));
-    sendableChooser.addOption("Red Amp Two Note Auto", new RedAmpSideTwoNote(s_Swerve, arm, intakeSubsystem, shooter));
-    sendableChooser.addOption("Blue Amp Two Note Auto", new BlueAmpSideTwoNote(s_Swerve, arm, intakeSubsystem, shooter));
+    // sendableChooser.addOption("Center One Note Auto", new OneNoteAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
+    // sendableChooser.addOption("Center Two Note Auto", new TwoNoteAuto(s_Swerve, arm, intakeSubsystem, shooter, delay));
+    // sendableChooser.addOption("Red Amp Two Note Auto", new RedAmpSideTwoNote(s_Swerve, arm, intakeSubsystem, shooter));
+    // sendableChooser.addOption("Blue Amp Two Note Auto", new BlueAmpSideTwoNote(s_Swerve, arm, intakeSubsystem, shooter));
 
-    sendableChooser.addOption("Red Amp One Note Auto", new OneNoteLeftAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
-    sendableChooser.addOption("Red Source One Note Auto", new OneNoteRightAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
-    sendableChooser.addOption("Red Source Shallow One Note Auto", new OneNoteShallowRightAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
+    // sendableChooser.addOption("Red Amp One Note Auto", new OneNoteLeftAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
+    // sendableChooser.addOption("Red Source One Note Auto", new OneNoteRightAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
+    // sendableChooser.addOption("Red Source Shallow One Note Auto", new OneNoteShallowRightAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
 
-    sendableChooser.addOption("Blue Amp One Note Auto", new OneNoteRightAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
-    sendableChooser.addOption("Blue Source One Note Auto", new OneNoteLeftAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
-    sendableChooser.addOption("Blue Source Shallow One Note Auto", new OneNoteShallowLeftAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
-
-    
+    // sendableChooser.addOption("Blue Amp One Note Auto", new OneNoteRightAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
+    // sendableChooser.addOption("Blue Source One Note Auto", new OneNoteLeftAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
+    // sendableChooser.addOption("Blue Source Shallow One Note Auto", new OneNoteShallowLeftAutoAndMoveOut(s_Swerve, arm, intakeSubsystem, shooter, delay));
 
     
-    sendableChooser.addOption("drive back", new DriveBackwards(s_Swerve));
-    SmartDashboard.putData("Auto Mode", sendableChooser);
+
+    
+    // sendableChooser.addOption("drive back", new DriveBackwards(s_Swerve));
+    // SmartDashboard.putData("Auto Mode", sendableChooser);
   }
 
   /**
@@ -294,7 +294,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
     // return new exampleAuto(s_Swerve);
-    return sendableChooser.getSelected();
+    //return sendableChooser.getSelected();  // FIXME: Want to choose from things again in the future
+    return new DoNothingCommand();
   }
 
   public static double shape(double start){

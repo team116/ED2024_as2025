@@ -3,9 +3,12 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 //import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,34 +18,36 @@ public class Arm extends SubsystemBase {
     private DutyCycleEncoder armEncoder;
 
     private SparkMax armRotationMotor;
+    private SparkMaxConfig armRotationMotorConfig = new SparkMaxConfig();
     //private SparkClosedLoopController armMotorController;
 
     private SparkLimitSwitch arm1LimitSwitch;
     private SparkLimitSwitch arm2LimitSwitch;
 
     public Arm() {
-/*
+
         armEncoder = new DutyCycleEncoder(Constants.ARM_ENCODER_CHANNEL, 360.0d, 0.0d);
         armRotationMotor = new SparkMax(Constants.ARM_ROTATION_MOTOR_ID, MotorType.kBrushless);
 
-        armRotationMotor.setIdleMode(IdleMode.kBrake);
+        armRotationMotorConfig
+            .idleMode(IdleMode.kBrake)
+            .inverted(true);
 
-        arm1LimitSwitch = armRotationMotor.getForwardLimitSwitch(Type.kNormallyClosed);
-        arm2LimitSwitch = armRotationMotor.getReverseLimitSwitch(Type.kNormallyClosed);
-
-        arm1LimitSwitch.enableLimitSwitch(true);
-        arm2LimitSwitch.enableLimitSwitch(true);
+        armRotationMotorConfig.limitSwitch
+            .forwardLimitSwitchType(Type.kNormallyClosed)
+            .reverseLimitSwitchType(Type.kNormallyClosed)
+            .forwardLimitSwitchEnabled(true)
+            .reverseLimitSwitchEnabled(true);
 
         //armMotorController = armRotationMotor.getClosedLoopController();
 
-        armRotationMotor.setInverted(true); //Originally  was false 
-
-        enableLimitSwitches();
+        //enableLimitSwitches();
 
         //armEncoder.setDistancePerRotation(360);  NOTE: Done through constructor now
 
-        armRotationMotor.burnFlash();  // FIXME: configure with all SparkBaseConfig settings...
-*/
+        //armRotationMotor.burnFlash();  // FIXME: configure with all SparkBaseConfig settings...
+        armRotationMotor.configure(armRotationMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     }
 
     public void moveUp() {
@@ -73,12 +78,25 @@ public class Arm extends SubsystemBase {
         // FIXME: We don't care about arm
         // arm1LimitSwitch.enableLimitSwitch(true);
         // arm2LimitSwitch.enableLimitSwitch(true);
+        armRotationMotorConfig.limitSwitch
+            .forwardLimitSwitchEnabled(true)
+            .reverseLimitSwitchEnabled(true);
+
+        // WARNING: No thread safety on armRotationMotorConfig assignments here...
+        armRotationMotor.configure(armRotationMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public void disableLimitSwitches() {
         // FIXME: still don't care about arm
         // arm1LimitSwitch.enableLimitSwitch(false);
         // arm2LimitSwitch.enableLimitSwitch(false);
+
+        armRotationMotorConfig.limitSwitch
+        .forwardLimitSwitchEnabled(false)
+        .reverseLimitSwitchEnabled(false);
+
+        // WARNING: No thread safety on armRotationMotorConfig assignments here...
+        armRotationMotor.configure(armRotationMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public double getAngleDegrees() {

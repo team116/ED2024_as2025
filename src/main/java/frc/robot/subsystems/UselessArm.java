@@ -1,8 +1,12 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -13,7 +17,9 @@ import frc.robot.Constants;
 @SuppressWarnings(value = { "removal" })
 public class UselessArm extends SubsystemBase{
     private SparkMax armMotor;
-    private CANCoder armCanCoder;
+    private SparkMaxConfig armMotorConfig = new SparkMaxConfig();
+    private CANcoder armCanCoder;
+    private CANcoderConfiguration armCanCoderConfig = new CANcoderConfiguration();
     private SparkLimitSwitch armTopLimitSwitch;
     private SparkLimitSwitch armBottomLimitSwitch;
     private SparkClosedLoopController armMotorController;
@@ -45,28 +51,28 @@ public class UselessArm extends SubsystemBase{
     }
 
     public UselessArm(){
-        // FIXME: Totally irrelevant class, should remove anyway
-        /*
         armMotor = new SparkMax(Constants.USELESS_ARM_MOTOR_ID, MotorType.kBrushless);
         // armMotor.setIdleMode(IdleMode.kBrake);
 
-        armCanCoder = new CANCoder(Constants.USELESS_ARM_CAN_CODER_ID);
-        armCanCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
+        armCanCoder = new CANcoder(Constants.USELESS_ARM_CAN_CODER_ID);
+        armCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5d;
+        armCanCoder.getConfigurator().apply(armCanCoderConfig);
 
         armEncoder = armMotor.getEncoder();
         armEncoder.setPosition(0.0);
 
-        armTopLimitSwitch = armMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyClosed);
-        armTopLimitSwitch.enableLimitSwitch(true);
-        armBottomLimitSwitch = armMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyClosed);
-        armBottomLimitSwitch.enableLimitSwitch(false);
-        
-        armMotorController = armMotor.getClosedLoopController();
-        armMotorController.setP(30.0);// original value before playing with is 0.001, 30 looks like it works nicely
-        armMotorController.setOutputRange(-0.2, 0.2);
-        armMotorController.setFF(0.0);
-        armMotor.burnFlash();
-        */
+        armMotorConfig.limitSwitch
+            .reverseLimitSwitchEnabled(true)
+            .reverseLimitSwitchType(Type.kNormallyClosed)
+            .forwardLimitSwitchEnabled(false)
+            .forwardLimitSwitchType(Type.kNormallyClosed);
+
+        armMotorConfig.closedLoop
+            .p(30.0)
+            .outputRange(-0.2, 0.2)
+            .velocityFF(0.0);
+
+        armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void moveUp(){
@@ -134,6 +140,6 @@ public class UselessArm extends SubsystemBase{
     }
 
     public double getCANCoderPosition() {
-        return armCanCoder.getAbsolutePosition();
+        return armCanCoder.getAbsolutePosition().getValueAsDouble();
     }
 }
