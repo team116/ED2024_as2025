@@ -168,6 +168,8 @@ public class SwerveModule {
 
     SparkMaxUtil.setSparkMaxBusUsage(driveMotor, Usage.kAll);
 
+    driveMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     driveEncoder.setPosition(0.0);
   }
 
